@@ -1,53 +1,53 @@
-using PizzariaBackend.Data;
+using PizzariaBackend.AppDbContexts;
 using PizzariaBackend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace PizzariaBackend.Services
 {
-    public class PedidoService
+    public class PedidosService
     {
-        private readonly DataStore _dataStore;
+        private readonly AppDbContext _context;
 
-        public PedidoService(DataStore dataStore)
+        public PedidosService(AppDbContext context)
         {
-            _dataStore = dataStore;
+            _context = context;
         }
 
-        public List<Pedido> ListarPedidos()
+        // Retorna todos os pedidos
+        public async Task<IEnumerable<Pedido>> GetAllAsync()
         {
-            return _dataStore.Pedidos;
+            return await _context.Pedidos.ToListAsync();
         }
 
-        public Pedido? BuscarPorId(int id)
+        // Retorna um pedido por ID
+        public async Task<Pedido?> GetByIdAsync(int id)
         {
-            return _dataStore.Pedidos.FirstOrDefault(p => p.Id == id);
+            return await _context.Pedidos.FindAsync(id);
         }
 
-        public void AdicionarPedido(Pedido pedido)
+        // Adiciona um novo pedido
+        public async Task AddAsync(Pedido pedido)
         {
-            pedido.Id = _dataStore.Pedidos.Count > 0 ? _dataStore.Pedidos.Max(p => p.Id) + 1 : 1;
-            pedido.DataPedido = DateTime.Now;
-            _dataStore.Pedidos.Add(pedido);
+            _context.Pedidos.Add(pedido);
+            await _context.SaveChangesAsync();
         }
 
-        public bool AtualizarPedido(int id, Pedido pedidoAtualizado)
+        // Atualiza um pedido existente
+        public async Task UpdateAsync(Pedido pedido)
         {
-            var pedido = BuscarPorId(id);
-            if (pedido == null) return false;
-
-            pedido.ClienteId = pedidoAtualizado.ClienteId;
-            pedido.Produtos = pedidoAtualizado.Produtos;
-            pedido.Total = pedidoAtualizado.Total;
-
-            return true;
+            _context.Pedidos.Update(pedido);
+            await _context.SaveChangesAsync();
         }
 
-        public bool RemoverPedido(int id)
+        // Remove um pedido por ID
+        public async Task DeleteAsync(int id)
         {
-            var pedido = BuscarPorId(id);
-            if (pedido == null) return false;
-
-            _dataStore.Pedidos.Remove(pedido);
-            return true;
+            var pedido = await _context.Pedidos.FindAsync(id);
+            if (pedido != null)
+            {
+                _context.Pedidos.Remove(pedido);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

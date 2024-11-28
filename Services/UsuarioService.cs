@@ -1,53 +1,43 @@
-using PizzariaBackend.Data;
 using PizzariaBackend.Models;
+using PizzariaBackend.AppDbContexts;
 
 namespace PizzariaBackend.Services
 {
-    public class UsuarioService
+  public class UsuarioService
+{
+    private readonly AppDbContext _context;
+
+    public UsuarioService(AppDbContext context)
     {
-        private readonly DataStore _dataStore;
+        _context = context;
+    }
 
-        public UsuarioService(DataStore dataStore)
+    public IEnumerable<Usuario> GetUsuarios()
+    {
+        return _context.Usuarios.ToList();
+    }
+
+    public Usuario? GetUsuarioById(int id)
+    {
+        return _context.Usuarios.Find(id);
+    }
+
+    public void AddUsuario(Usuario usuario)
+    {
+        _context.Usuarios.Add(usuario);
+        _context.SaveChanges();
+    }
+
+    public void DeleteUsuario(int id)
+    {
+        var usuario = _context.Usuarios.Find(id);
+        if (usuario != null)
         {
-            _dataStore = dataStore;
-        }
-
-        public List<Usuario> ListarUsuarios()
-        {
-            return _dataStore.Usuarios;
-        }
-
-        public Usuario? BuscarPorId(int id)
-        {
-            return _dataStore.Usuarios.FirstOrDefault(u => u.Id == id);
-        }
-
-        public void AdicionarUsuario(Usuario usuario)
-        {
-            usuario.Id = _dataStore.Usuarios.Count > 0 ? _dataStore.Usuarios.Max(u => u.Id) + 1 : 1;
-            _dataStore.Usuarios.Add(usuario);
-        }
-
-        public bool AtualizarUsuario(int id, Usuario usuarioAtualizado)
-        {
-            var usuario = BuscarPorId(id);
-            if (usuario == null) return false;
-
-            usuario.Nome = usuarioAtualizado.Nome;
-            usuario.Email = usuarioAtualizado.Email;
-            usuario.Senha = usuarioAtualizado.Senha;
-            usuario.Regra = usuarioAtualizado.Regra;
-
-            return true;
-        }
-
-        public bool RemoverUsuario(int id)
-        {
-            var usuario = BuscarPorId(id);
-            if (usuario == null) return false;
-
-            _dataStore.Usuarios.Remove(usuario);
-            return true;
+            _context.Usuarios.Remove(usuario);
+            _context.SaveChanges();
         }
     }
+}
+
+
 }

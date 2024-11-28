@@ -1,50 +1,61 @@
-using PizzariaBackend.Data;
+using PizzariaBackend.AppDbContexts;
 using PizzariaBackend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace PizzariaBackend.Services
 {
     public class ConfiguracoesService
     {
-        private readonly DataStore _dataStore;
+        private readonly AppDbContext _context;
 
-        public ConfiguracoesService(DataStore dataStore)
+        public ConfiguracoesService(AppDbContext context)
         {
-            _dataStore = dataStore;
+            _context = context;
         }
 
         public List<Configuracoes> ListarConfiguracoes()
         {
-            return _dataStore.Configuracoes;
+            // Retorna todas as configurações do banco de dados
+            return _context.Configuracoes.ToList();
         }
 
         public Configuracoes? BuscarPorNome(string nome)
         {
-            return _dataStore.Configuracoes.FirstOrDefault(c => c.Nome == nome);
+            // Busca a configuração pelo nome no banco de dados
+            return _context.Configuracoes.FirstOrDefault(c => c.Nome == nome);
         }
 
         public void AdicionarConfiguracao(Configuracoes configuracao)
         {
-            configuracao.Id = _dataStore.Configuracoes.Count > 0 ? _dataStore.Configuracoes.Max(c => c.Id) + 1 : 1;
-            _dataStore.Configuracoes.Add(configuracao);
+            // Adiciona uma nova configuração no banco de dados
+            _context.Configuracoes.Add(configuracao);
+            _context.SaveChanges();
         }
 
         public bool AtualizarConfiguracao(int id, Configuracoes configuracaoAtualizada)
         {
-            var configuracao = _dataStore.Configuracoes.FirstOrDefault(c => c.Id == id);
+            // Busca a configuração existente no banco
+            var configuracao = _context.Configuracoes.FirstOrDefault(c => c.Id == id);
             if (configuracao == null) return false;
 
+            // Atualiza os dados da configuração
             configuracao.Nome = configuracaoAtualizada.Nome;
             configuracao.Valor = configuracaoAtualizada.Valor;
 
+            _context.Configuracoes.Update(configuracao);
+            _context.SaveChanges();
             return true;
         }
 
         public bool RemoverConfiguracao(int id)
         {
-            var configuracao = _dataStore.Configuracoes.FirstOrDefault(c => c.Id == id);
+            // Busca a configuração no banco de dados
+            var configuracao = _context.Configuracoes.FirstOrDefault(c => c.Id == id);
             if (configuracao == null) return false;
 
-            _dataStore.Configuracoes.Remove(configuracao);
+            // Remove a configuração do banco
+            _context.Configuracoes.Remove(configuracao);
+            _context.SaveChanges();
             return true;
         }
     }

@@ -1,32 +1,39 @@
 using Microsoft.AspNetCore.Mvc;
 using PizzariaBackend.Models;
+using PizzariaBackend.Services; // Certifique-se de importar o namespace do serviço
 
 namespace PizzariaBackend.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class ProdutosController : ControllerBase
     {
-        public static List<Produto> Produtos = new List<Produto>();
+        private readonly ProdutoService _produtoService;
+
+        // Injeção de dependência do ProdutoService
+        public ProdutosController(ProdutoService produtoService)
+        {
+            _produtoService = produtoService;
+        }
 
         [HttpGet]
         public IActionResult GetProdutos()
         {
-            return Ok(Produtos);
+            var produtos = _produtoService.GetAllProdutos();
+            return Ok(produtos);
         }
 
         [HttpPost]
         public IActionResult AddProduto(Produto produto)
         {
-            produto.Id = Produtos.Count + 1;
-            Produtos.Add(produto);
+            _produtoService.AddProduto(produto);
             return CreatedAtAction(nameof(GetProdutoById), new { id = produto.Id }, produto);
         }
 
         [HttpGet("{id}")]
         public IActionResult GetProdutoById(int id)
         {
-            var produto = Produtos.FirstOrDefault(p => p.Id == id);
+            var produto = _produtoService.GetProdutoById(id);
             if (produto == null)
                 return NotFound();
 
@@ -36,7 +43,7 @@ namespace PizzariaBackend.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateProduto(int id, Produto produtoAtualizado)
         {
-            var produto = Produtos.FirstOrDefault(p => p.Id == id);
+            var produto = _produtoService.GetProdutoById(id);
             if (produto == null)
                 return NotFound();
 
@@ -45,17 +52,18 @@ namespace PizzariaBackend.Controllers
             produto.Descricao = produtoAtualizado.Descricao;
             produto.SubcategoriaId = produtoAtualizado.SubcategoriaId;
 
+            _produtoService.UpdateProduto(produto); // Atualiza o produto
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteProduto(int id)
         {
-            var produto = Produtos.FirstOrDefault(p => p.Id == id);
+            var produto = _produtoService.GetProdutoById(id);
             if (produto == null)
                 return NotFound();
 
-            Produtos.Remove(produto);
+            _produtoService.DeleteProduto(id); // Deleta o produto
             return NoContent();
         }
     }

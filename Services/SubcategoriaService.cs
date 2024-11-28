@@ -1,51 +1,48 @@
-using PizzariaBackend.Data;
+using PizzariaBackend.AppDbContexts;
 using PizzariaBackend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace PizzariaBackend.Services
 {
     public class SubcategoriaService
     {
-        private readonly DataStore _dataStore;
+        private readonly AppDbContext _context;
 
-        public SubcategoriaService(DataStore dataStore)
+        public SubcategoriaService(AppDbContext context)
         {
-            _dataStore = dataStore;
+            _context = context;
         }
 
-        public List<Subcategoria> ListarSubcategorias()
+        public async Task<IEnumerable<Subcategoria>> GetAllAsync()
         {
-            return _dataStore.Subcategorias;
+            return await _context.Subcategorias.ToListAsync();
         }
 
-        public Subcategoria? BuscarPorId(int id)
+        public async Task<Subcategoria?> GetByIdAsync(int id)
         {
-            return _dataStore.Subcategorias.FirstOrDefault(s => s.Id == id);
+            return await _context.Subcategorias.FindAsync(id);
         }
 
-        public void AdicionarSubcategoria(Subcategoria subcategoria)
+        public async Task AddAsync(Subcategoria subcategoria)
         {
-            subcategoria.Id = _dataStore.Subcategorias.Count > 0 ? _dataStore.Subcategorias.Max(s => s.Id) + 1 : 1;
-            _dataStore.Subcategorias.Add(subcategoria);
+            _context.Subcategorias.Add(subcategoria);
+            await _context.SaveChangesAsync();
         }
 
-        public bool AtualizarSubcategoria(int id, Subcategoria subcategoriaAtualizada)
+        public async Task UpdateAsync(Subcategoria subcategoria)
         {
-            var subcategoria = BuscarPorId(id);
-            if (subcategoria == null) return false;
-
-            subcategoria.Nome = subcategoriaAtualizada.Nome;
-            subcategoria.CategoriaId = subcategoriaAtualizada.CategoriaId;
-
-            return true;
+            _context.Subcategorias.Update(subcategoria);
+            await _context.SaveChangesAsync();
         }
 
-        public bool RemoverSubcategoria(int id)
+        public async Task DeleteAsync(int id)
         {
-            var subcategoria = BuscarPorId(id);
-            if (subcategoria == null) return false;
-
-            _dataStore.Subcategorias.Remove(subcategoria);
-            return true;
+            var subcategoria = await _context.Subcategorias.FindAsync(id);
+            if (subcategoria != null)
+            {
+                _context.Subcategorias.Remove(subcategoria);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

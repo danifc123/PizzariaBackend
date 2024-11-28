@@ -1,19 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using PizzariaBackend.Models;
 
-namespace PizzariaBackend.Data
+namespace PizzariaBackend.AppDbContexts
 {
     public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<Usuario> Usuarios { get; set; }
-        public DbSet<Produto> Produtos { get; set; }
-        public DbSet<Cliente> Clientes { get; set; }
-        public DbSet<Categoria> Categorias { get; set; }
-        public DbSet<Subcategoria> Subcategorias { get; set; }
-        public DbSet<Cupom> Cupons { get; set; }
-        public DbSet<Pedido> Pedidos { get; set; }
-        public DbSet<Configuracoes> Configuracoes { get; set; }
+        public required DbSet<Usuario> Usuarios { get; set; }
+        public required DbSet<Produto> Produtos { get; set; }
+        public required DbSet<Cliente> Clientes { get; set; }
+        public required DbSet<Categoria> Categorias { get; set; }
+        public required DbSet<Subcategoria> Subcategorias { get; set; }
+        public required DbSet<Cupom> Cupons { get; set; }
+        public required DbSet<Pedido> Pedidos { get; set; }
+        public required DbSet<Configuracoes> Configuracoes { get; set; }
     }
 }

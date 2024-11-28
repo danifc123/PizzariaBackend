@@ -1,47 +1,45 @@
+using PizzariaBackend.AppDbContexts;
 using PizzariaBackend.Models;
 
-namespace PizzariaBackend.Services
+namespace PizzariaBackend.Services;
+public class ClienteService
 {
-    public class ClienteService
+    private readonly AppDbContext _context;
+
+    public ClienteService(AppDbContext context)
     {
-        private readonly List<Cliente> _clientes = new();
+        _context = context;
+    }
 
-        public List<Cliente> ListarClientes()
+    public IEnumerable<Cliente> GetAllClientes()
+    {
+        return _context.Clientes.ToList();
+    }
+
+    public Cliente? GetClienteById(int id)
+    {
+        return _context.Clientes.Find(id);
+    }
+
+    public void AddCliente(Cliente cliente)
+    {
+        _context.Clientes.Add(cliente);
+        _context.SaveChanges();
+    }
+
+    public void UpdateCliente(Cliente cliente)
+    {
+        _context.Clientes.Update(cliente);
+        _context.SaveChanges();
+    }
+
+    public void DeleteCliente(int id)
+    {
+        var cliente = _context.Clientes.Find(id);
+        if (cliente != null)
         {
-            return _clientes;
-        }
-
-        public Cliente? BuscarPorId(int id)
-        {
-            return _clientes.FirstOrDefault(c => c.Id == id);
-        }
-
-        public void AdicionarCliente(Cliente cliente)
-        {
-            cliente.Id = _clientes.Count > 0 ? _clientes.Max(c => c.Id) + 1 : 1;
-            _clientes.Add(cliente);
-        }
-
-        public bool AtualizarCliente(int id, Cliente clienteAtualizado)
-        {
-            var cliente = BuscarPorId(id);
-            if (cliente == null) return false;
-
-            cliente.Nome = clienteAtualizado.Nome;
-            cliente.Email = clienteAtualizado.Email;
-            cliente.Telefone = clienteAtualizado.Telefone;
-            cliente.Endereco = clienteAtualizado.Endereco;
-
-            return true;
-        }
-
-        public bool RemoverCliente(int id)
-        {
-            var cliente = BuscarPorId(id);
-            if (cliente == null) return false;
-
-            _clientes.Remove(cliente);
-            return true;
+            _context.Clientes.Remove(cliente);
+            _context.SaveChanges();
         }
     }
 }

@@ -1,52 +1,48 @@
-using PizzariaBackend.Data;
+using PizzariaBackend.AppDbContexts;
 using PizzariaBackend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace PizzariaBackend.Services
 {
-    public class CupomService
+    public class CuponsService
     {
-        private readonly DataStore _dataStore;
+        private readonly AppDbContext _context;
 
-        public CupomService(DataStore dataStore)
+        public CuponsService(AppDbContext context)
         {
-            _dataStore = dataStore;
+            _context = context;
         }
 
-        public List<Cupom> ListarCupons()
+        public async Task<IEnumerable<Cupom>> GetAllAsync()
         {
-            return _dataStore.Cupons;
+            return await _context.Cupons.ToListAsync();
         }
 
-        public Cupom? BuscarPorCodigo(string codigo)
+        public async Task<Cupom?> GetByIdAsync(int id)
         {
-            return _dataStore.Cupons.FirstOrDefault(c => c.Codigo == codigo);
+            return await _context.Cupons.FindAsync(id);
         }
 
-        public void AdicionarCupom(Cupom cupom)
+        public async Task AddAsync(Cupom cupom)
         {
-            cupom.Id = _dataStore.Cupons.Count > 0 ? _dataStore.Cupons.Max(c => c.Id) + 1 : 1;
-            _dataStore.Cupons.Add(cupom);
+            _context.Cupons.Add(cupom);
+            await _context.SaveChangesAsync();
         }
 
-        public bool AtualizarCupom(int id, Cupom cupomAtualizado)
+        public async Task UpdateAsync(Cupom cupom)
         {
-            var cupom = _dataStore.Cupons.FirstOrDefault(c => c.Id == id);
-            if (cupom == null) return false;
-
-            cupom.Codigo = cupomAtualizado.Codigo;
-            cupom.Desconto = cupomAtualizado.Desconto;
-            cupom.Validade = cupomAtualizado.Validade;
-
-            return true;
+            _context.Cupons.Update(cupom);
+            await _context.SaveChangesAsync();
         }
 
-        public bool RemoverCupom(int id)
+        public async Task DeleteAsync(int id)
         {
-            var cupom = _dataStore.Cupons.FirstOrDefault(c => c.Id == id);
-            if (cupom == null) return false;
-
-            _dataStore.Cupons.Remove(cupom);
-            return true;
+            var cupom = await _context.Cupons.FindAsync(id);
+            if (cupom != null)
+            {
+                _context.Cupons.Remove(cupom);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

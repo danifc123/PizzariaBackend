@@ -1,53 +1,47 @@
-using PizzariaBackend.Data;
+using PizzariaBackend.AppDbContexts;
 using PizzariaBackend.Models;
 
-namespace PizzariaBackend.Services
+namespace PizzariaBackend.Services // Verifique se o namespace está correto
 {
     public class ProdutoService
     {
-        private readonly DataStore _dataStore;
+        private readonly AppDbContext _context;
 
-        public ProdutoService(DataStore dataStore)
+        public ProdutoService(AppDbContext context)
         {
-            _dataStore = dataStore;
+            _context = context;
         }
 
-        public List<Produto> ListarProdutos()
+        public IEnumerable<Produto> GetAllProdutos()
         {
-            return _dataStore.Produtos;
+            return _context.Produtos.ToList();
         }
 
-        public Produto? BuscarPorId(int id)
+        public Produto? GetProdutoById(int id)
         {
-            return _dataStore.Produtos.FirstOrDefault(p => p.Id == id);
+            return _context.Produtos.Find(id);
         }
 
-        public void AdicionarProduto(Produto produto)
+        public void AddProduto(Produto produto)
         {
-            produto.Id = _dataStore.Produtos.Count > 0 ? _dataStore.Produtos.Max(p => p.Id) + 1 : 1;
-            _dataStore.Produtos.Add(produto);
+            _context.Produtos.Add(produto);
+            _context.SaveChanges();
         }
 
-        public bool AtualizarProduto(int id, Produto produtoAtualizado)
+        public void UpdateProduto(Produto produto)
         {
-            var produto = BuscarPorId(id);
-            if (produto == null) return false;
-
-            produto.Nome = produtoAtualizado.Nome;
-            produto.Preco = produtoAtualizado.Preco;
-            produto.Descricao = produtoAtualizado.Descricao;
-            produto.SubcategoriaId = produtoAtualizado.SubcategoriaId;
-
-            return true;
+            _context.Produtos.Update(produto);
+            _context.SaveChanges();
         }
 
-        public bool RemoverProduto(int id)
+        public void DeleteProduto(int id)
         {
-            var produto = BuscarPorId(id);
-            if (produto == null) return false;
-
-            _dataStore.Produtos.Remove(produto);
-            return true;
+            var produto = _context.Produtos.Find(id);
+            if (produto != null)
+            {
+                _context.Produtos.Remove(produto);
+                _context.SaveChanges();
+            }
         }
     }
 }
