@@ -1,4 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+using PizzariaBackend.Data;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Adicionar serviços ao container.
 builder.Services.AddControllers(); // Suporte para controladores MVC.
