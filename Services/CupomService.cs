@@ -1,48 +1,73 @@
-using PizzariaBackend.AppDbContexts;
+using Microsoft.AspNetCore.Mvc;
 using PizzariaBackend.Models;
-using Microsoft.EntityFrameworkCore;
+using PizzariaBackend.Services;
 
-namespace PizzariaBackend.Services
+namespace PizzariaBackend.Controllers
 {
-    public class CuponsService
+    [ApiController]
+    [Route("api/[controller]")]
+    public class CuponsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly CuponsService _cuponsService;
 
-        public CuponsService(AppDbContext context)
+        public CuponsController(CuponsService cuponsService)
         {
-            _context = context;
+            _cuponsService = cuponsService;
         }
 
-        public async Task<IEnumerable<Cupom>> GetAllAsync()
+        // Get todos os cupons
+        [HttpGet]
+        public async Task<IActionResult> GetCupons()
         {
-            return await _context.Cupons.ToListAsync();
+            var cupons = await _cuponsService.GetAllAsync();
+            return Ok(cupons);
         }
 
-        public async Task<Cupom?> GetByIdAsync(int id)
+        // Adicionar um novo cupom
+        [HttpPost]
+        public async Task<IActionResult> AddCupom(Cupom cupom)
         {
-            return await _context.Cupons.FindAsync(id);
+            await _cuponsService.AddAsync(cupom);
+            return CreatedAtAction(nameof(GetCupomById), new { id = cupom.Id }, cupom);
         }
 
-        public async Task AddAsync(Cupom cupom)
+        // Buscar um cupom por ID
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetCupomById(int id)
         {
-            _context.Cupons.Add(cupom);
-            await _context.SaveChangesAsync();
+            var cupom = await _cuponsService.GetByIdAsync(id);
+            if (cupom == null)
+                return NotFound();
+
+            return Ok(cupom);
         }
 
-        public async Task UpdateAsync(Cupom cupom)
+        // Atualizar um cupom
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCupom(int id, Cupom cupomAtualizado)
         {
-            _context.Cupons.Update(cupom);
-            await _context.SaveChangesAsync();
+            var cupomExistente = await _cuponsService.GetByIdAsync(id);
+            if (cupomExistente == null)
+                return NotFound();
+
+            cupomExistente.Codigo = cupomAtualizado.Codigo;
+            cupomExistente.Desconto = cupomAtualizado.Desconto;
+            cupomExistente.Validade = cupomAtualizado.Validade;
+
+            await _cuponsService.UpdateAsync(cupomExistente);
+            return NoContent();
         }
 
-        public async Task DeleteAsync(int id)
+        // Deletar um cupom
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCupom(int id)
         {
-            var cupom = await _context.Cupons.FindAsync(id);
-            if (cupom != null)
-            {
-                _context.Cupons.Remove(cupom);
-                await _context.SaveChangesAsync();
-            }
+            var cupom = await _cuponsService.GetByIdAsync(id);
+            if (cupom == null)
+                return NotFound();
+
+            await _cuponsService.DeleteAsync(id);
+            return NoContent();
         }
     }
 }

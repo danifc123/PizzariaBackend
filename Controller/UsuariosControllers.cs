@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PizzariaBackend.Models;
+using PizzariaBackend.Services;
 
 namespace PizzariaBackend.Controllers
 {
@@ -7,36 +8,40 @@ namespace PizzariaBackend.Controllers
     [Route("api/[controller]")]
     public class UsuariosController : ControllerBase
     {
-public static List<Usuario> Usuarios = new List<Usuario>();
+        private readonly UsuarioService _usuarioService;
+
+        public UsuariosController(UsuarioService usuarioService)
+        {
+            _usuarioService = usuarioService;
+        }
 
         [HttpGet]
-        public IActionResult GetUsuarios()
+        public async Task<IActionResult> GetUsuarios()
         {
-            return Ok(Usuarios);
+            var usuarios = await _usuarioService.GetUsuarios();
+            return Ok(usuarios);
         }
 
         [HttpPost]
-        public IActionResult AddUsuario(Usuario usuario)
+        public async Task<IActionResult> AddUsuario([FromBody] Usuario usuario)
         {
-            usuario.Id = Usuarios.Count + 1;
-            Usuarios.Add(usuario);
+            await _usuarioService.AddUsuario(usuario);
             return CreatedAtAction(nameof(GetUsuarioById), new { id = usuario.Id }, usuario);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetUsuarioById(int id)
+        public async Task<IActionResult> GetUsuarioById(int id)
         {
-            var usuario = Usuarios.FirstOrDefault(u => u.Id == id);
+            var usuario = await _usuarioService.GetUsuarioById(id);
             if (usuario == null)
                 return NotFound();
-
             return Ok(usuario);
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateUsuario(int id, Usuario usuarioAtualizado)
+        public async Task<IActionResult> UpdateUsuario(int id, [FromBody] Usuario usuarioAtualizado)
         {
-            var usuario = Usuarios.FirstOrDefault(u => u.Id == id);
+            var usuario = await _usuarioService.GetUsuarioById(id);
             if (usuario == null)
                 return NotFound();
 
@@ -45,17 +50,18 @@ public static List<Usuario> Usuarios = new List<Usuario>();
             usuario.Senha = usuarioAtualizado.Senha;
             usuario.Regra = usuarioAtualizado.Regra;
 
+            await _usuarioService.UpdateUsuario(usuario);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteUsuario(int id)
+        public async Task<IActionResult> DeleteUsuario(int id)
         {
-            var usuario = Usuarios.FirstOrDefault(u => u.Id == id);
+            var usuario = await _usuarioService.GetUsuarioById(id);
             if (usuario == null)
                 return NotFound();
 
-            Usuarios.Remove(usuario);
+            await _usuarioService.DeleteUsuario(id);
             return NoContent();
         }
     }

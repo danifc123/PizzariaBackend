@@ -1,7 +1,6 @@
 using PizzariaBackend.AppDbContexts;
 using PizzariaBackend.Models;
 
-namespace PizzariaBackend.Services;
 public class ClienteService
 {
     private readonly AppDbContext _context;

@@ -12,7 +12,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Adicionar os serviços ao contêiner
 builder.Services.AddScoped<UsuarioService>();
-builder.Services.AddScoped<PedidosService>();
+builder.Services.AddScoped<PedidoService>();
 builder.Services.AddScoped<SubcategoriaService>();
 builder.Services.AddScoped<CuponsService>();
 builder.Services.AddScoped<ProdutoService>();

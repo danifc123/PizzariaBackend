@@ -13,32 +13,31 @@ namespace PizzariaBackend.Services
             _context = context;
         }
 
+        // Listar todas as configurações
         public List<Configuracoes> ListarConfiguracoes()
         {
-            // Retorna todas as configurações do banco de dados
             return _context.Configuracoes.ToList();
         }
 
+        // Buscar configuração pelo nome
         public Configuracoes? BuscarPorNome(string nome)
         {
-            // Busca a configuração pelo nome no banco de dados
             return _context.Configuracoes.FirstOrDefault(c => c.Nome == nome);
         }
 
+        // Adicionar uma nova configuração
         public void AdicionarConfiguracao(Configuracoes configuracao)
         {
-            // Adiciona uma nova configuração no banco de dados
             _context.Configuracoes.Add(configuracao);
             _context.SaveChanges();
         }
 
+        // Atualizar uma configuração existente
         public bool AtualizarConfiguracao(int id, Configuracoes configuracaoAtualizada)
         {
-            // Busca a configuração existente no banco
             var configuracao = _context.Configuracoes.FirstOrDefault(c => c.Id == id);
             if (configuracao == null) return false;
 
-            // Atualiza os dados da configuração
             configuracao.Nome = configuracaoAtualizada.Nome;
             configuracao.Valor = configuracaoAtualizada.Valor;
 
@@ -47,13 +46,12 @@ namespace PizzariaBackend.Services
             return true;
         }
 
+        // Remover uma configuração
         public bool RemoverConfiguracao(int id)
         {
-            // Busca a configuração no banco de dados
             var configuracao = _context.Configuracoes.FirstOrDefault(c => c.Id == id);
             if (configuracao == null) return false;
 
-            // Remove a configuração do banco
             _context.Configuracoes.Remove(configuracao);
             _context.SaveChanges();
             return true;

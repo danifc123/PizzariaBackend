@@ -1,61 +1,53 @@
-using Microsoft.AspNetCore.Mvc;
+using PizzariaBackend.AppDbContexts;
 using PizzariaBackend.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace PizzariaBackend.Controllers
+namespace PizzariaBackend.Services
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class CuponsController : ControllerBase
+    public class CuponsService
     {
-        public static List<Cupom> Cupons = new List<Cupom>();
+        private readonly AppDbContext _context;
 
-        [HttpGet]
-        public IActionResult GetCupons()
+        public CuponsService(AppDbContext context)
         {
-            return Ok(Cupons);
+            _context = context;
         }
 
-        [HttpPost]
-        public IActionResult AddCupom(Cupom cupom)
+        // Obter todos os cupons
+        public async Task<IEnumerable<Cupom>> GetAllAsync()
         {
-            cupom.Id = Cupons.Count + 1;
-            Cupons.Add(cupom);
-            return CreatedAtAction(nameof(GetCupomById), new { id = cupom.Id }, cupom);
+            return await _context.Cupons.ToListAsync();
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetCupomById(int id)
+        // Obter um cupom pelo ID
+        public async Task<Cupom?> GetByIdAsync(int id)
         {
-            var cupom = Cupons.FirstOrDefault(c => c.Id == id);
-            if (cupom == null)
-                return NotFound();
-
-            return Ok(cupom);
+            return await _context.Cupons.FindAsync(id);
         }
 
-        [HttpPut("{id}")]
-        public IActionResult UpdateCupom(int id, Cupom cupomAtualizado)
+        // Adicionar um novo cupom
+        public async Task AddAsync(Cupom cupom)
         {
-            var cupom = Cupons.FirstOrDefault(c => c.Id == id);
-            if (cupom == null)
-                return NotFound();
-
-            cupom.Codigo = cupomAtualizado.Codigo;
-            cupom.Desconto = cupomAtualizado.Desconto;
-            cupom.Validade = cupomAtualizado.Validade;
-
-            return NoContent();
+            _context.Cupons.Add(cupom);
+            await _context.SaveChangesAsync();
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult DeleteCupom(int id)
+        // Atualizar um cupom
+        public async Task UpdateAsync(Cupom cupom)
         {
-            var cupom = Cupons.FirstOrDefault(c => c.Id == id);
-            if (cupom == null)
-                return NotFound();
+            _context.Cupons.Update(cupom);
+            await _context.SaveChangesAsync();
+        }
 
-            Cupons.Remove(cupom);
-            return NoContent();
+        // Deletar um cupom
+        public async Task DeleteAsync(int id)
+        {
+            var cupom = await _context.Cupons.FindAsync(id);
+            if (cupom != null)
+            {
+                _context.Cupons.Remove(cupom);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

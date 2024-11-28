@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PizzariaBackend.Models;
+using PizzariaBackend.Services;
 
 namespace PizzariaBackend.Controllers
 {
@@ -7,53 +8,58 @@ namespace PizzariaBackend.Controllers
     [Route("api/[controller]")]
     public class SubcategoriasController : ControllerBase
     {
-        public static List<Subcategoria> Subcategorias = new List<Subcategoria>();
+        private readonly SubcategoriaService _subcategoriaService;
+
+        public SubcategoriasController(SubcategoriaService subcategoriaService)
+        {
+            _subcategoriaService = subcategoriaService;
+        }
 
         [HttpGet]
-        public IActionResult GetSubcategorias()
+        public async Task<IActionResult> GetSubcategorias()
         {
-            return Ok(Subcategorias);
+            var subcategorias = await _subcategoriaService.GetAllAsync();
+            return Ok(subcategorias);
         }
 
         [HttpPost]
-        public IActionResult AddSubcategoria(Subcategoria subcategoria)
+        public async Task<IActionResult> AddSubcategoria([FromBody] Subcategoria subcategoria)
         {
-            subcategoria.Id = Subcategorias.Count + 1;
-            Subcategorias.Add(subcategoria);
+            await _subcategoriaService.AddAsync(subcategoria);
             return CreatedAtAction(nameof(GetSubcategoriaById), new { id = subcategoria.Id }, subcategoria);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetSubcategoriaById(int id)
+        public async Task<IActionResult> GetSubcategoriaById(int id)
         {
-            var subcategoria = Subcategorias.FirstOrDefault(s => s.Id == id);
+            var subcategoria = await _subcategoriaService.GetByIdAsync(id);
             if (subcategoria == null)
                 return NotFound();
-
             return Ok(subcategoria);
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateSubcategoria(int id, Subcategoria subcategoriaAtualizada)
+        public async Task<IActionResult> UpdateSubcategoria(int id, [FromBody] Subcategoria subcategoriaAtualizada)
         {
-            var subcategoria = Subcategorias.FirstOrDefault(s => s.Id == id);
+            var subcategoria = await _subcategoriaService.GetByIdAsync(id);
             if (subcategoria == null)
                 return NotFound();
 
             subcategoria.Nome = subcategoriaAtualizada.Nome;
             subcategoria.CategoriaId = subcategoriaAtualizada.CategoriaId;
 
+            await _subcategoriaService.UpdateAsync(subcategoria);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteSubcategoria(int id)
+        public async Task<IActionResult> DeleteSubcategoria(int id)
         {
-            var subcategoria = Subcategorias.FirstOrDefault(s => s.Id == id);
+            var subcategoria = await _subcategoriaService.GetByIdAsync(id);
             if (subcategoria == null)
                 return NotFound();
 
-            Subcategorias.Remove(subcategoria);
+            await _subcategoriaService.DeleteAsync(id);
             return NoContent();
         }
     }

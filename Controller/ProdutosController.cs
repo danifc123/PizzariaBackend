@@ -1,16 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using PizzariaBackend.Models;
-using PizzariaBackend.Services; // Certifique-se de importar o namespace do serviço
+using PizzariaBackend.Services;
 
 namespace PizzariaBackend.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class ProdutosController : ControllerBase
     {
         private readonly ProdutoService _produtoService;
 
-        // Injeção de dependência do ProdutoService
         public ProdutosController(ProdutoService produtoService)
         {
             _produtoService = produtoService;
@@ -23,13 +22,6 @@ namespace PizzariaBackend.Controllers
             return Ok(produtos);
         }
 
-        [HttpPost]
-        public IActionResult AddProduto(Produto produto)
-        {
-            _produtoService.AddProduto(produto);
-            return CreatedAtAction(nameof(GetProdutoById), new { id = produto.Id }, produto);
-        }
-
         [HttpGet("{id}")]
         public IActionResult GetProdutoById(int id)
         {
@@ -38,6 +30,13 @@ namespace PizzariaBackend.Controllers
                 return NotFound();
 
             return Ok(produto);
+        }
+
+        [HttpPost]
+        public IActionResult AddProduto(Produto produto)
+        {
+            _produtoService.AddProduto(produto);
+            return CreatedAtAction(nameof(GetProdutoById), new { id = produto.Id }, produto);
         }
 
         [HttpPut("{id}")]
@@ -49,10 +48,8 @@ namespace PizzariaBackend.Controllers
 
             produto.Nome = produtoAtualizado.Nome;
             produto.Preco = produtoAtualizado.Preco;
-            produto.Descricao = produtoAtualizado.Descricao;
-            produto.SubcategoriaId = produtoAtualizado.SubcategoriaId;
+            _produtoService.UpdateProduto(produto);
 
-            _produtoService.UpdateProduto(produto); // Atualiza o produto
             return NoContent();
         }
 
@@ -63,7 +60,7 @@ namespace PizzariaBackend.Controllers
             if (produto == null)
                 return NotFound();
 
-            _produtoService.DeleteProduto(id); // Deleta o produto
+            _produtoService.DeleteProduto(id);
             return NoContent();
         }
     }

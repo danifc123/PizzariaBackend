@@ -1,43 +1,48 @@
 using PizzariaBackend.Models;
 using PizzariaBackend.AppDbContexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace PizzariaBackend.Services
 {
-  public class UsuarioService
-{
-    private readonly AppDbContext _context;
-
-    public UsuarioService(AppDbContext context)
+    public class UsuarioService
     {
-        _context = context;
-    }
+        private readonly AppDbContext _context;
 
-    public IEnumerable<Usuario> GetUsuarios()
-    {
-        return _context.Usuarios.ToList();
-    }
-
-    public Usuario? GetUsuarioById(int id)
-    {
-        return _context.Usuarios.Find(id);
-    }
-
-    public void AddUsuario(Usuario usuario)
-    {
-        _context.Usuarios.Add(usuario);
-        _context.SaveChanges();
-    }
-
-    public void DeleteUsuario(int id)
-    {
-        var usuario = _context.Usuarios.Find(id);
-        if (usuario != null)
+        public UsuarioService(AppDbContext context)
         {
-            _context.Usuarios.Remove(usuario);
-            _context.SaveChanges();
+            _context = context;
+        }
+
+        public async Task<IEnumerable<Usuario>> GetUsuarios()
+        {
+            return await _context.Usuarios.ToListAsync();
+        }
+
+        public async Task<Usuario?> GetUsuarioById(int id)
+        {
+            return await _context.Usuarios.FindAsync(id);
+        }
+
+        public async Task AddUsuario(Usuario usuario)
+        {
+            _context.Usuarios.Add(usuario);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateUsuario(Usuario usuario)
+        {
+            _context.Usuarios.Update(usuario);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteUsuario(int id)
+        {
+            var usuario = await _context.Usuarios.FindAsync(id);
+            if (usuario != null)
+            {
+                _context.Usuarios.Remove(usuario);
+                await _context.SaveChangesAsync();
+            }
         }
     }
-}
-
-
 }

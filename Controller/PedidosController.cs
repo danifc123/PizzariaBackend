@@ -7,43 +7,51 @@ namespace PizzariaBackend.Controllers
     [Route("api/[controller]")]
     public class PedidosController : ControllerBase
     {
-        public static List<Pedido> Pedidos = new List<Pedido>();
+        private readonly PedidoService _pedidoService;
+
+        public PedidosController(PedidoService pedidoService)
+        {
+            _pedidoService = pedidoService;
+        }
 
         [HttpGet]
         public IActionResult GetPedidos()
         {
-            return Ok(Pedidos);
-        }
-
-        [HttpPost]
-        public IActionResult AddPedido(Pedido pedido)
-        {
-            pedido.Id = Pedidos.Count + 1;
-            Pedidos.Add(pedido);
-            return CreatedAtAction(nameof(GetPedidoById), new { id = pedido.Id }, pedido);
+            var pedidos = _pedidoService.GetAllPedidos();
+            return Ok(pedidos);
         }
 
         [HttpGet("{id}")]
         public IActionResult GetPedidoById(int id)
         {
-            var pedido = Pedidos.FirstOrDefault(p => p.Id == id);
+            var pedido = _pedidoService.GetPedidoById(id);
             if (pedido == null)
                 return NotFound();
 
             return Ok(pedido);
         }
 
+        [HttpPost]
+        public IActionResult AddPedido(Pedido pedido)
+        {
+            _pedidoService.AddPedido(pedido);
+            return CreatedAtAction(nameof(GetPedidoById), new { id = pedido.Id }, pedido);
+        }
+
         [HttpPut("{id}")]
         public IActionResult UpdatePedido(int id, Pedido pedidoAtualizado)
         {
-            var pedido = Pedidos.FirstOrDefault(p => p.Id == id);
+            var pedido = _pedidoService.GetPedidoById(id);
             if (pedido == null)
                 return NotFound();
 
+            // Atualizar campos do pedido, conforme o que está no banco
             pedido.ClienteId = pedidoAtualizado.ClienteId;
-            pedido.Produtos = pedidoAtualizado.Produtos;
-            pedido.Total = pedidoAtualizado.Total;
             pedido.DataPedido = pedidoAtualizado.DataPedido;
+            pedido.Total = pedidoAtualizado.Total;
+            // Se tiver outros campos, adicione aqui...
+
+            _pedidoService.UpdatePedido(pedido);
 
             return NoContent();
         }
@@ -51,11 +59,11 @@ namespace PizzariaBackend.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeletePedido(int id)
         {
-            var pedido = Pedidos.FirstOrDefault(p => p.Id == id);
+            var pedido = _pedidoService.GetPedidoById(id);
             if (pedido == null)
                 return NotFound();
 
-            Pedidos.Remove(pedido);
+            _pedidoService.DeletePedido(id);
             return NoContent();
         }
     }
