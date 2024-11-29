@@ -66,5 +66,23 @@ namespace PizzariaBackend.Controllers
             _pedidoService.DeletePedido(id);
             return NoContent();
         }
+
+    [HttpPatch("{pedidoId}/produto/{produtoId}")]
+public IActionResult AtualizarProdutoDoPedido(int pedidoId, int produtoId, [FromBody] int novoProdutoId)
+{
+    try
+    {
+        _pedidoService.AtualizarProdutoDoPedido(pedidoId, produtoId, novoProdutoId);
+
+        return Ok(new
+        {
+            mensagem = "Produto atualizado com sucesso no pedido."
+        });
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new { mensagem = ex.Message });
+    }
+}
     }
 }
